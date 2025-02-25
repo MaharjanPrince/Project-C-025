@@ -1,7 +1,7 @@
 # DFS
 Depth-First Search (DFS) is a fundamental algorithm used for traversing and searching through data structures like trees and graphs. It starts at a given node, explores as deep as possible along each branch, and then backtracks when it reaches a dead end. In maze solving, DFS systematically explores paths until it finds the exit, making it a practical approach for navigating complex structures.
 
-If we take this sample of 10 X 10 maze
+If we take this sample of 10 X 10 maze having multiple solutions
 <pre>
 0S00000111 
 1111010111 
