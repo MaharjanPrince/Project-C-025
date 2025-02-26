@@ -106,15 +106,15 @@ void printMaze()
         for (int j = 0; j < cols; j++)
         {
             if (maze[i][j] == '0')
-                printf("   "); // Walkable path
+                printf(" "); // Walkable path
             else if (maze[i][j] == '1')
-                printf(" | "); // Wall
+                printf("|"); // Wall
             else if (maze[i][j] == 'S')
-                printf(" S "); // Start point
+                printf("S"); // Start point
             else if (maze[i][j] == 'E')
-                printf(" E "); // End point
+                printf("E"); // End point
             else if (maze[i][j] == '*')
-                printf(" * "); // Solution path
+                printf("*"); // Solution path
         }
         printf("\n");
     }
