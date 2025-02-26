@@ -215,7 +215,7 @@ void setDirectionOrder()
 }
 
 // DFS Function (Recursive)
-bool dfs(int x, int y)
+bool dfs(int x, int y, int prevDir)
 {
     if (x < 0 || y < 0 || x >= rows || y >= cols || maze[x][y] == '1' || visited[x][y])
         return false;
@@ -225,12 +225,27 @@ bool dfs(int x, int y)
     if (x == endX && y == endY)
         return true;
 
+    // Continue in the same direction first (if valid)
+    if (prevDir != -1)
+    {
+        int newX = x + dx1[prevDir];
+        int newY = y + dy1[prevDir];
+
+        if (dfs(newX, newY, prevDir))
+        {
+            maze[x][y] = '*'; // Mark path
+            return true;
+        }
+    }
+    // If the straight path is blocked, explore other directions
     for (int i = 0; i < 4; i++)
     {
+        if (i == prevDir)
+            continue; // Skip if already tried moving straight
         int newX = x + dx1[i];
         int newY = y + dy1[i];
 
-        if (dfs(newX, newY))
+        if (dfs(newX, newY, i))
         {
             maze[x][y] = '*'; // Mark path
             return true;
@@ -256,7 +271,7 @@ void solveWithDFS()
         for (int j = 0; j < cols; j++)
             visited[i][j] = false;
 
-    dfs(startX, startY);
+    dfs(startX, startY, -1); // -1 indicates no previous direction initially
     
     printf("\nSolved Maze using DFS:\n");
     maze[startX][startY] = 'S'; // Restore start position
