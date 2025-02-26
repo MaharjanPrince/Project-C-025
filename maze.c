@@ -25,11 +25,11 @@ bool visited[MAX][MAX];
 int startX, startY, endX, endY;
 bool found = false;
 
-// Directions: Up, Right, Down, Left (DFS and BFS)
+// Directions: Up, Right, Down, Left (BFS)
 int dx[] = {-1, 0, 1, 0};
 int dy[] = {0, 1, 0, -1};
 
-// Global direction arrays
+// Global direction arrays (DFS)
 int dx1[4], dy1[4];
 
 // Function to enqueue for BFS
@@ -170,7 +170,7 @@ int BFS(char maze[MAX][MAX], int startX, int startY, int endX, int endY)
     }
     return -1; // No path found
 }
-
+//To determine the order of search for DFS
 void setDirectionOrder()
 {
     char order[5]; // 4 characters + null terminator
@@ -236,8 +236,7 @@ bool dfs(int x, int y)
             return true;
         }
     }
-
-    return false;
+    // return false;
 }
 
 // Function to solve the maze using DFS
