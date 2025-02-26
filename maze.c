@@ -78,7 +78,7 @@ void setDirectionOrder()
 }
 
 // DFS Function (Recursive)
-bool dfs(int x, int y)
+bool dfs(int x, int y, int prevDir)
 {
     // If out of bounds or at a wall or already visited, return false
     if (x < 0 || y < 0 || x >= rows || y >= cols || maze[x][y] == '1' || visited[x][y])
@@ -93,19 +93,33 @@ bool dfs(int x, int y)
         return true;
     }
 
-    // Recursively explore all four directions
-    for (int i = 0; i < 4; i++)
+    // Continue in the same direction first (if valid)
+    if (prevDir != -1)
     {
-        int newX = x + dx[i];
-        int newY = y + dy[i];
+        int newX = x + dx[prevDir];
+        int newY = y + dy[prevDir];
 
-        if (dfs(newX, newY))
+        if (dfs(newX, newY, prevDir))
         {
-            maze[x][y] = '*'; // Mark the correct path
+            maze[x][y] = '*'; // Mark path
             return true;
         }
     }
 
+    // If the straight path is blocked, explore other directions
+    for (int i = 0; i < 4; i++)
+    {
+        if (i == prevDir)
+            continue; // Skip if already tried moving straight
+        int newX = x + dx[i];
+        int newY = y + dy[i];
+
+        if (dfs(newX, newY, i))
+        {
+            maze[x][y] = '*'; // Mark path
+            return true;
+        }
+    }
     return false; // If no path found
 }
 
@@ -118,7 +132,7 @@ void solveWithDFS()
         for (int j = 0; j < cols; j++)
             visited[i][j] = false;
 
-    found = dfs(startX, startY);
+    found = dfs(startX, startY, -1);
 
     if (found)
     {
