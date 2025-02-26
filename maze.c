@@ -10,12 +10,14 @@ int dx[] = {-1, 0, 1, 0};
 int dy[] = {0, 1, 0, -1};
 
 // Node structure for BFS
-typedef struct {
+typedef struct
+{
     int x, y, dist;
 } Node;
 
 // Queue structure for BFS
-typedef struct {
+typedef struct
+{
     Node queue[MAX * MAX];
     int front, rear;
 } Queue;
@@ -28,73 +30,99 @@ int startX, startY, endX, endY;
 bool found = false;
 
 // Function to enqueue for BFS
-void enqueue(Queue *q, int x, int y, int dist) {
+void enqueue(Queue *q, int x, int y, int dist)
+{
     q->queue[q->rear++] = (Node){x, y, dist};
 }
 
 // Function to dequeue for BFS
-Node dequeue(Queue *q) {
+Node dequeue(Queue *q)
+{
     return q->queue[q->front++];
 }
 
 // Check if queue is empty (BFS)
-int isEmpty(Queue *q) {
+int isEmpty(Queue *q)
+{
     return q->front == q->rear;
 }
 
 // Function to print the maze (visualization)
-void printMaze() {
-    for (int i = 0; i < rows; i++) {
-        for (int j = 0; j < cols; j++) {
+void printMaze()
+{
+    for (int i = 0; i < rows; i++)
+    {
+        for (int j = 0; j < cols; j++)
+        {
             if (maze[i][j] == '0')
-                printf("  ");   // Walkable path
+                printf(" "); // Walkable path
             else if (maze[i][j] == '1')
-                printf("|| ");   // Wall
+                printf("|"); // Wall
             else if (maze[i][j] == 'S')
-                printf("S ");   // Start point
+                printf("S"); // Start point
             else if (maze[i][j] == 'E')
-                printf("E ");   // End point
+                printf("E"); // End point
             else if (maze[i][j] == '*')
-                printf("* ");   // Solution path
+                printf("*"); // Solution path
         }
         printf("\n");
     }
 }
 
 // BFS Algorithm
-int BFS(char maze[MAX][MAX], int startX, int startY, int endX, int endY) {
+int BFS(char maze[MAX][MAX], int startX, int startY, int endX, int endY)
+{
     int visited[MAX][MAX] = {0};
     Queue q = {.front = 0, .rear = 0};
+    int prev[MAX][MAX][2] = {-1}; // To store the previous node for each visited node
 
     enqueue(&q, startX, startY, 0);
     visited[startX][startY] = 1;
 
-    while (!isEmpty(&q)) {
+    while (!isEmpty(&q))
+    {
         Node current = dequeue(&q);
 
         // Check if we've reached the end
-        if (current.x == endX && current.y == endY) {
-            return current.dist;  // Shortest path length
+        if (current.x == endX && current.y == endY)
+        {
+            // Backtrack to mark the solution path
+            int x = endX, y = endY;
+            while (x != startX || y != startY)
+            {
+                maze[x][y] = '*';
+                int tempX = prev[x][y][0], tempY = prev[x][y][1];
+                x = tempX;
+                y = tempY;
+            }
+            maze[startX][startY] = 'S'; // Restore start position
+            maze[endX][endY] = 'E';     // Restore end position
+            return current.dist;         // Shortest path length
         }
 
         // Explore all 4 directions
-        for (int i = 0; i < 4; i++) {
+        for (int i = 0; i < 4; i++)
+        {
             int newX = current.x + dx[i];
             int newY = current.y + dy[i];
 
             // Check maze boundaries and valid paths
             if (newX >= 0 && newX < rows && newY >= 0 && newY < cols &&
-                (maze[newX][newY] == '0' || maze[newX][newY] == 'E') && !visited[newX][newY]) {
+                (maze[newX][newY] == '0' || maze[newX][newY] == 'E') && !visited[newX][newY])
+            {
                 enqueue(&q, newX, newY, current.dist + 1);
                 visited[newX][newY] = 1;
+                prev[newX][newY][0] = current.x; // Store previous node
+                prev[newX][newY][1] = current.y; // Store previous node
             }
         }
     }
-    return -1;  // No path found
+    return -1; // No path found
 }
 
 // DFS Function (Recursive)
-bool dfs(int x, int y) {
+bool dfs(int x, int y)
+{
     if (x < 0 || y < 0 || x >= rows || y >= cols || maze[x][y] == '1' || visited[x][y])
         return false;
 
@@ -103,11 +131,13 @@ bool dfs(int x, int y) {
     if (x == endX && y == endY)
         return true;
 
-    for (int i = 0; i < 4; i++) {
+    for (int i = 0; i < 4; i++)
+    {
         int newX = x + dx[i];
         int newY = y + dy[i];
 
-        if (dfs(newX, newY)) {
+        if (dfs(newX, newY))
+        {
             maze[x][y] = '*'; // Mark path
             return true;
         }
@@ -117,16 +147,20 @@ bool dfs(int x, int y) {
 }
 
 // Function to solve the maze using DFS
-void solveWithDFS() {
+void solveWithDFS()
+{
     memset(visited, 0, sizeof(visited));
     found = dfs(startX, startY);
 
-    if (found) {
+    if (found)
+    {
         printf("\nSolved Maze using DFS:\n");
         maze[startX][startY] = 'S'; // Restore start position
         maze[endX][endY] = 'E';     // Restore end position
-        printMaze();  // Print the maze with the solution path
-    } else {
+        printMaze();                // Print the maze with the solution path
+    }
+    else
+    {
         printf("\nNo solution exists.\n");
     }
 }
@@ -134,20 +168,28 @@ void solveWithDFS() {
 // Function to read the maze from user input
 void readMaze() {
     printf("Enter the number of rows and columns: ");
-    scanf("%d %d", &rows, &cols);
-
-    printf("Enter the maze (%d x %d) using 0 for path, 1 for wall, S for start, E for end:\n", rows, cols);
-    for (int i = 0; i < rows; i++) {
-        scanf("%s", maze[i]);
+    if (scanf("%d %d", &rows, &cols) != 2) {
+        printf("Invalid input for rows and columns.\n");
+        exit(1); // Exit the program if input is invalid
     }
 
-    // Locate Start (S) and End (E) positions
+    // Read each row of the maze
+    printf("Enter the maze (%d x %d) using 0 for path, 1 for wall, S for start, E for end:\n", rows, cols);
+    for (int i = 0; i < rows; i++) {
+        if (scanf("%s", maze[i]) != 1) {
+            printf("Error reading maze row.\n");
+            exit(1); // Exit the program if input is invalid
+        }
+    }
+
+    // Find the start and end positions in the maze
     for (int i = 0; i < rows; i++) {
         for (int j = 0; j < cols; j++) {
             if (maze[i][j] == 'S') {
                 startX = i;
                 startY = j;
-            } else if (maze[i][j] == 'E') {
+            }
+            if (maze[i][j] == 'E') {
                 endX = i;
                 endY = j;
             }
@@ -155,20 +197,24 @@ void readMaze() {
     }
 }
 
-int main() {
-    readMaze();  // Input maze
+int main()
+{
+    readMaze(); // Input maze
 
     printf("\nSolving maze using BFS...\n");
     int result = BFS(maze, startX, startY, endX, endY);
-    if (result != -1) {
+    if (result != -1)
+    {
         printf("Shortest path length using BFS is: %d\n", result);
-        printMaze();  // Print the maze with the BFS solution path
-    } else {
+        printMaze(); // Print the maze with the BFS solution path
+    }
+    else
+    {
         printf("No path found using BFS.\n");
     }
 
     printf("\nSolving maze using DFS...\n");
-    solveWithDFS();  // Solve and visualize using DFS
+    solveWithDFS(); // Solve and visualize using DFS
 
     return 0;
 }
