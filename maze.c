@@ -5,10 +5,6 @@
 
 #define MAX 100 // Maximum maze size
 
-// Directions: Up, Right, Down, Left (DFS and BFS)
-int dx[] = {-1, 0, 1, 0};
-int dy[] = {0, 1, 0, -1};
-
 // Node structure for BFS
 typedef struct
 {
@@ -24,10 +20,17 @@ typedef struct
 
 // Global variables for maze dimensions and data
 int rows, cols;
-char maze[MAX][MAX];
+char maze[MAX][MAX], temp[MAX][MAX];
 bool visited[MAX][MAX];
 int startX, startY, endX, endY;
 bool found = false;
+
+// Directions: Up, Right, Down, Left (DFS and BFS)
+int dx[] = {-1, 0, 1, 0};
+int dy[] = {0, 1, 0, -1};
+
+// Global direction arrays
+int dx1[4], dy1[4];
 
 // Function to enqueue for BFS
 void enqueue(Queue *q, int x, int y, int dist)
@@ -47,6 +50,54 @@ int isEmpty(Queue *q)
     return q->front == q->rear;
 }
 
+// Function to read the maze from user input
+void readMaze()
+{
+    printf("Enter the number of rows and columns: ");
+    if (scanf("%d %d", &rows, &cols) != 2)
+    {
+        printf("Invalid input for rows and columns.\n");
+        exit(1); // Exit the program if input is invalid
+    }
+
+    // Read each row of the maze
+    printf("Enter the maze (%d x %d) using 0 for path, 1 for wall, S for start, E for end:\n", rows, cols);
+    for (int i = 0; i < rows; i++)
+    {
+        if (scanf("%s", maze[i]) != 1)
+        {
+            printf("Error reading maze row.\n");
+            exit(1); // Exit the program if input is invalid
+        }
+    }
+    // To copy to temp
+    for (int i = 0; i < rows; i++)
+    {
+        for (int j = 0; j < cols; j++)
+        {
+            temp[i][j] = maze[i][j];
+        }
+    }
+
+    // Find the start and end positions in the maze
+    for (int i = 0; i < rows; i++)
+    {
+        for (int j = 0; j < cols; j++)
+        {
+            if (maze[i][j] == 'S')
+            {
+                startX = i;
+                startY = j;
+            }
+            if (maze[i][j] == 'E')
+            {
+                endX = i;
+                endY = j;
+            }
+        }
+    }
+}
+
 // Function to print the maze (visualization)
 void printMaze()
 {
@@ -55,15 +106,15 @@ void printMaze()
         for (int j = 0; j < cols; j++)
         {
             if (maze[i][j] == '0')
-                printf(" "); // Walkable path
+                printf("   "); // Walkable path
             else if (maze[i][j] == '1')
-                printf("|"); // Wall
+                printf(" | "); // Wall
             else if (maze[i][j] == 'S')
-                printf("S"); // Start point
+                printf(" S "); // Start point
             else if (maze[i][j] == 'E')
-                printf("E"); // End point
+                printf(" E "); // End point
             else if (maze[i][j] == '*')
-                printf("*"); // Solution path
+                printf(" * "); // Solution path
         }
         printf("\n");
     }
@@ -97,7 +148,7 @@ int BFS(char maze[MAX][MAX], int startX, int startY, int endX, int endY)
             }
             maze[startX][startY] = 'S'; // Restore start position
             maze[endX][endY] = 'E';     // Restore end position
-            return current.dist;         // Shortest path length
+            return current.dist;        // Shortest path length
         }
 
         // Explore all 4 directions
@@ -120,6 +171,49 @@ int BFS(char maze[MAX][MAX], int startX, int startY, int endX, int endY)
     return -1; // No path found
 }
 
+void setDirectionOrder()
+{
+    char order[5]; // 4 characters + null terminator
+    printf("Enter order of directions (e.g., LRUD for Left, Right, Up, Down): ");
+    scanf("%4s", order); // Read up to 4 characters
+
+    if (strlen(order) != 4)
+    {
+        printf("Please enter exactly 4 characters (L, R, U, D).\n");
+        exit(1);
+    }
+
+    for (int i = 0; i < 4; i++)
+    {
+        char d = order[i];
+        if (d == 'L' || d == 'l')
+        {
+            dx1[i] = 0;  // Row change: none
+            dy1[i] = -1; // Column change: left
+        }
+        else if (d == 'R' || d == 'r')
+        {
+            dx1[i] = 0;
+            dy1[i] = 1;
+        }
+        else if (d == 'U' || d == 'u')
+        {
+            dx1[i] = -1; // Row change: up
+            dy1[i] = 0;
+        }
+        else if (d == 'D' || d == 'd')
+        {
+            dx1[i] = 1; // Row change: down
+            dy1[i] = 0;
+        }
+        else
+        {
+            printf("Invalid direction character: %c\n", d);
+            exit(1);
+        }
+    }
+}
+
 // DFS Function (Recursive)
 bool dfs(int x, int y)
 {
@@ -133,8 +227,8 @@ bool dfs(int x, int y)
 
     for (int i = 0; i < 4; i++)
     {
-        int newX = x + dx[i];
-        int newY = y + dy[i];
+        int newX = x + dx1[i];
+        int newY = y + dy1[i];
 
         if (dfs(newX, newY))
         {
@@ -149,7 +243,20 @@ bool dfs(int x, int y)
 // Function to solve the maze using DFS
 void solveWithDFS()
 {
-    memset(visited, 0, sizeof(visited));
+    // To get original maze with no changes
+    for (int i = 0; i < rows; i++)
+    {
+        for (int j = 0; j < cols; j++)
+        {
+            maze[i][j] = temp[i][j];
+        }
+    }
+    setDirectionOrder();
+    // Initialize visited array
+    for (int i = 0; i < rows; i++)
+        for (int j = 0; j < cols; j++)
+            visited[i][j] = false;
+
     found = dfs(startX, startY);
 
     if (found)
@@ -162,38 +269,6 @@ void solveWithDFS()
     else
     {
         printf("\nNo solution exists.\n");
-    }
-}
-
-// Function to read the maze from user input
-void readMaze() {
-    printf("Enter the number of rows and columns: ");
-    if (scanf("%d %d", &rows, &cols) != 2) {
-        printf("Invalid input for rows and columns.\n");
-        exit(1); // Exit the program if input is invalid
-    }
-
-    // Read each row of the maze
-    printf("Enter the maze (%d x %d) using 0 for path, 1 for wall, S for start, E for end:\n", rows, cols);
-    for (int i = 0; i < rows; i++) {
-        if (scanf("%s", maze[i]) != 1) {
-            printf("Error reading maze row.\n");
-            exit(1); // Exit the program if input is invalid
-        }
-    }
-
-    // Find the start and end positions in the maze
-    for (int i = 0; i < rows; i++) {
-        for (int j = 0; j < cols; j++) {
-            if (maze[i][j] == 'S') {
-                startX = i;
-                startY = j;
-            }
-            if (maze[i][j] == 'E') {
-                endX = i;
-                endY = j;
-            }
-        }
     }
 }
 
