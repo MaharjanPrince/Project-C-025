@@ -257,19 +257,12 @@ void solveWithDFS()
         for (int j = 0; j < cols; j++)
             visited[i][j] = false;
 
-    found = dfs(startX, startY);
-
-    if (found)
-    {
-        printf("\nSolved Maze using DFS:\n");
-        maze[startX][startY] = 'S'; // Restore start position
-        maze[endX][endY] = 'E';     // Restore end position
-        printMaze();                // Print the maze with the solution path
-    }
-    else
-    {
-        printf("\nNo solution exists.\n");
-    }
+    dfs(startX, startY);
+    
+    printf("\nSolved Maze using DFS:\n");
+    maze[startX][startY] = 'S'; // Restore start position
+    maze[endX][endY] = 'E';     // Restore end position
+    printMaze();
 }
 
 int main()
@@ -285,7 +278,8 @@ int main()
     }
     else
     {
-        printf("No path found using BFS.\n");
+        printf("\nNot solvable");
+        exit(1);
     }
 
     printf("\nSolving maze using DFS...\n");
